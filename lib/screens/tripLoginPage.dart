@@ -16,8 +16,8 @@ class TripLoginPage extends StatefulWidget {
 
 class _TripLoginPageState extends State<TripLoginPage> {
   Text warningText = const Text('');
-  TextEditingController phoneNoController = TextEditingController(text: "0817399999");
-  TextEditingController passwordController = TextEditingController(text: "1111");
+  TextEditingController phoneNoController = TextEditingController(text: "");
+  TextEditingController passwordController = TextEditingController(text: "");
 
   var apiEndPoint;
   @override
@@ -26,6 +26,10 @@ class _TripLoginPageState extends State<TripLoginPage> {
     Configuration.getConfig().then(
       (config) {
         apiEndPoint = config['apiEndpoint'];
+        // alert
+        // scaffold show apiendpoint
+        // ScaffoldMessenger.of(context)
+        //     .showSnackBar(SnackBar(content: Text(apiEndPoint)));
       },
     );
   }
@@ -37,57 +41,63 @@ class _TripLoginPageState extends State<TripLoginPage> {
       body: ListView(
         children: [
           // image
-          GestureDetector(onDoubleTap: () => log("Double Tap Me"), child: Image.asset('assets/images/logo.png')),
+          GestureDetector(
+              onDoubleTap: () => log("Double Tap Me"),
+              child: Image.asset('assets/images/logo.png')),
           // input label 'phone number'
           Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    'หมายเลขโทรศัพท์',
-                    style: TextStyle(
-                      fontSize: 16,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        'หมายเลขโทรศัพท์',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                // input field 'phone number'
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: TextField(
-                    controller: phoneNoController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter Phone Number',
+                    // input field 'phone number'
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: TextField(
+                        controller: phoneNoController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Enter Phone Number',
+                        ),
+                        keyboardType: TextInputType.phone,
+                      ),
                     ),
-                    keyboardType: TextInputType.phone,
-                  ),
-                ),
-              ])),
+                  ])),
           Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    'รหัสผ่าน',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                // input field 'password'
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: TextField(
-                      controller: passwordController,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Enter Password',
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        'รหัสผ่าน',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
-                      obscureText: true),
-                ),
-              ])),
+                    ),
+                    // input field 'password'
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: TextField(
+                          controller: passwordController,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter Password',
+                          ),
+                          obscureText: true),
+                    ),
+                  ])),
           // button 'register' textbutton
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
@@ -127,17 +137,39 @@ class _TripLoginPageState extends State<TripLoginPage> {
   }
 
   void loginMethod() {
-    CustomerPostLoginReq data = CustomerPostLoginReq(phone: phoneNoController.text, password: passwordController.text);
+    CustomerPostLoginReq data = CustomerPostLoginReq(
+        phone: phoneNoController.text, password: passwordController.text);
 
-    http.post(Uri.parse("$apiEndPoint/customers/login"), headers: {"Content-Type": "application/json; charset=utf-8"}, body: customerPostLoginReqToJson(data)).then((response) {
+    http
+        .post(Uri.parse("$apiEndPoint/customers/login"),
+            headers: {"Content-Type": "application/json; charset=utf-8"},
+            body: customerPostLoginReqToJson(data))
+        .then((response) {
       // log(response.body);
-      CustomerLoginRes customerLoginRes = CustomerLoginRes.fromJson(jsonDecode(response.body));
+      CustomerLoginRes customerLoginRes =
+          CustomerLoginRes.fromJson(jsonDecode(response.body));
       log(customerLoginRes.message);
       log(customerLoginRes.customer.email);
       log(customerLoginRes.customer.toJson().toString());
-      Navigator.pushNamed(context, MyAppRoutes.tripHomePage.value, arguments: customerLoginRes.customer.idx);
+      Navigator.pushNamed(context, MyAppRoutes.tripHomePage.value,
+          arguments: customerLoginRes.customer.idx);
     }).catchError((error) {
       log(error.toString());
+      // alert
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('ผิดพลาด'),
+          content: Text(error.toString()),
+          actions: [
+            FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('ปิด'))
+          ],
+        ),
+      );
       setState(() {
         // Update the text and UI
         warningText = const Text(

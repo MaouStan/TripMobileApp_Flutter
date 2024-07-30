@@ -31,8 +31,9 @@ class _TripProfilePageState extends State<TripProfilePage> {
     super.initState();
     Configuration.getConfig().then((value) {
       apiEndPoint = value['apiEndpoint'];
-      loadData = getCustomerById(widget.cid);
+      // loadData = getCustomerById(widget.cid);
     });
+    loadData = getCustomerById(widget.cid);
   }
 
   @override
@@ -217,9 +218,9 @@ class _TripProfilePageState extends State<TripProfilePage> {
       var response = await http.get(Uri.parse('$apiEndPoint/customers'));
       // check phone or email in database already
       List<CustomersRes> customers = customersResFromJson(response.body);
-      for (CustomersRes customer in customers) {
-        if (customer.phone == phoneController.text ||
-            customer.email == emailController.text) {
+      for (CustomersRes dbCustomer in customers) {
+        if (dbCustomer.phone == phoneController.text && phoneController.text != customer.phone ||
+            dbCustomer.email == emailController.text && emailController.text != customer.email) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(

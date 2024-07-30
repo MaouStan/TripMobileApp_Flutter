@@ -197,7 +197,7 @@ class _TripRegisterPageState extends State<TripRegisterPage> {
     }
 
     // phone wrong format regex number 10
-    if (!(RegExp(r'+d{10}').hasMatch(phone))) {
+    if (!RegExp(r'^\d{10}$').hasMatch(phone)) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('หมายเลขโทรศัพท์ไม่ถูกต้อง')));
       return;
@@ -228,7 +228,7 @@ class _TripRegisterPageState extends State<TripRegisterPage> {
       // check phone or email in database already
       // get all customers GET http://192.168.237.161:3000/customers
       http.Response response =
-          await http.get(Uri.parse("http://192.168.237.161:3000/customers"));
+          await http.get(Uri.parse("$apiEndPoint/customers"));
       // check phone or email in database already
       List<CustomersRes> customers = customersResFromJson(response.body);
       for (CustomersRes customer in customers) {
