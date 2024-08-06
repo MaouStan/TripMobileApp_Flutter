@@ -16,8 +16,8 @@ class TripLoginPage extends StatefulWidget {
 
 class _TripLoginPageState extends State<TripLoginPage> {
   Text warningText = const Text('');
-  TextEditingController phoneNoController = TextEditingController(text: "");
-  TextEditingController passwordController = TextEditingController(text: "");
+  TextEditingController phoneNoController = TextEditingController(text: "0812345678");
+  TextEditingController passwordController = TextEditingController(text: "1234");
 
   var apiEndPoint;
   @override

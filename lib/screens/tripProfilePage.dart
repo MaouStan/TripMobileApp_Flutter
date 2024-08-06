@@ -18,7 +18,6 @@ class TripProfilePage extends StatefulWidget {
 class _TripProfilePageState extends State<TripProfilePage> {
   late Future<void> loadData;
   late CustomerRes customer;
-  late String apiEndPoint;
 
   // form data textController
   TextEditingController nameController = TextEditingController();
@@ -29,10 +28,6 @@ class _TripProfilePageState extends State<TripProfilePage> {
   @override
   void initState() {
     super.initState();
-    Configuration.getConfig().then((value) {
-      apiEndPoint = value['apiEndpoint'];
-      // loadData = getCustomerById(widget.cid);
-    });
     loadData = getCustomerById(widget.cid);
   }
 
@@ -63,6 +58,10 @@ class _TripProfilePageState extends State<TripProfilePage> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
+            nameController.text = customer.fullname;
+            phoneController.text = customer.phone;
+            emailController.text = customer.email;
+            imageController.text = customer.image;
             return SingleChildScrollView(
               child: Padding(
                   padding:
@@ -141,7 +140,6 @@ class _TripProfilePageState extends State<TripProfilePage> {
   Future<void> getCustomerById(int cid) async {
     var config = await Configuration.getConfig();
     var apiEndPoint = config['apiEndpoint'];
-
     var url = '$apiEndPoint/customers/$cid';
     var response = await http.get(
       Uri.parse(url),
@@ -151,22 +149,39 @@ class _TripProfilePageState extends State<TripProfilePage> {
     );
     try {
       CustomerRes tempCustomer = customerResFromJson(response.body);
-
-      setState(() {
-        customer = tempCustomer;
-        nameController.text = customer.fullname;
-        phoneController.text = customer.phone;
-        emailController.text = customer.email;
-        imageController.text = customer.image;
-      });
-
+      customer = tempCustomer;
       log(customer.toJson().toString());
     } catch (error) {
       log("Error $error");
     }
+    await Future.delayed(const Duration(seconds: 1));
   }
 
-  Future<void> updateProfile() async {
+  void updateProfile() {
+    // confirm dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ยืนยันการบันทึก'),
+        content: const Text('คุณแน่ใจที่จะบันทึกข้อมูล'),
+        actions: [
+          FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('ยกเลิก')),
+          FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                updateProfileService();
+              },
+              child: const Text('ยืนยัน'))
+        ],
+      ),
+    );
+  }
+
+  Future<void> updateProfileService() async {
     // clear old ScaffoldMessenger
     ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -212,6 +227,9 @@ class _TripProfilePageState extends State<TripProfilePage> {
       image: imageController.text,
     );
 
+    var config = await Configuration.getConfig();
+    var apiEndPoint = config['apiEndpoint'];
+
     try {
       // check phone or email in database already
       // get all customers GET http://192.168.237.161:3000/customers
@@ -219,8 +237,10 @@ class _TripProfilePageState extends State<TripProfilePage> {
       // check phone or email in database already
       List<CustomersRes> customers = customersResFromJson(response.body);
       for (CustomersRes dbCustomer in customers) {
-        if (dbCustomer.phone == phoneController.text && phoneController.text != customer.phone ||
-            dbCustomer.email == emailController.text && emailController.text != customer.email) {
+        if (dbCustomer.phone == phoneController.text &&
+                phoneController.text != customer.phone ||
+            dbCustomer.email == emailController.text &&
+                emailController.text != customer.email) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -315,7 +335,9 @@ class _TripProfilePageState extends State<TripProfilePage> {
     );
   }
 
-  void deleteCustomer() {
+  Future<void> deleteCustomer() async {
+    var config = await Configuration.getConfig();
+    var apiEndPoint = config['apiEndpoint'];
     var url = '$apiEndPoint/customers/${customer.idx}';
 
     http

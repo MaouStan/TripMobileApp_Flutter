@@ -10,10 +10,10 @@ import 'package:trip/screens/week_two_first.dart';
 import 'screens/tripProfilePage.dart';
 
 enum MyAppRoutes {
-  menu('/'),
+  menu('/menu'),
   login('/login'),
   weekTwoFirstPage('/week2_first_page'),
-  tripLoginPage('/trip_login_page'),
+  tripLoginPage('/'), //trip_login_page
   tripHomePage('/trip_home_page'),
   tripRegisterPage('/trip_register_page'),
   tripProfilePage('/trip_profile_page'),

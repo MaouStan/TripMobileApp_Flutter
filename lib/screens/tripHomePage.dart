@@ -202,6 +202,8 @@ class _TripHomePageState extends State<TripHomePage> {
         }
       });
     }
+
+    await Future.delayed(const Duration(seconds: 1));
   }
 
   void menuSelected(String value) {
@@ -210,7 +212,8 @@ class _TripHomePageState extends State<TripHomePage> {
       Navigator.of(context).popUntil(
           (route) => route.settings.name == MyAppRoutes.tripLoginPage.value);
     } else {
-      Navigator.pushNamed(context, MyAppRoutes.tripProfilePage.value, arguments: widget.cid);
+      Navigator.pushNamed(context, MyAppRoutes.tripProfilePage.value,
+          arguments: widget.cid);
     }
   }
 }
